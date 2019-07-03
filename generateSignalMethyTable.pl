@@ -1,4 +1,4 @@
-test
+
 # Useage: perl generateSignalMethyTable.pl name_of_file_in_results name_of_cell_line
 
 #use strict;
@@ -7,13 +7,6 @@ use File::Glob;
 my $input = $ARGV[0];
 my $cell_type = $ARGV[1];
 my $OutputFolder = "." . "/" . "results/" . $input . "/final/";
-
-##remove all past methylation files!!! (.sem, /METHYL, ect.)
-#    system("rm","./results/$input/final/ALIGNMENT/*.me");
-
-#unless (-d "../results/$input/METHYL"){ #alt   
-#    glob(`mkdir ../results/$input/METHYL`); #alt        
-#}
 
 #1. Add methylation data to signal file
 print STDERR "Integrating methylation";
@@ -27,19 +20,22 @@ print STDERR "Done\n";
 
 #3. Create a R plot
 print STDERR "Creating R plot";
-system ("../src/generateRmeplot.pl -TF_name $input -output $OutputFolder");
+system ("../src/plotSEMme_Functions.R  -TF_name $input -output $OutputFolder");
 print STDERR "Done\n";
+
 
 #All subs found below
 sub methyl_match() {
+#=pod
+#### Calculate methylation for alignment files
     my $nuc_pos;
     my $nuc;
     my $pos;
     my $loci;
-    
+
     my %methyl_locus_line;
     my $me_locus = "";
-#    my $CpG = glob ("./examples/test2");
+#    my $CpG = glob ("./examples/test4.wig");
 #    my $CpG = glob ("./examples/WGBS/ENCFF073DUG.wig"); # make general, add as argument
     my $CpG = glob ("./examples/WGBS/$cell_type");    
     open (methyl_file, $CpG) || die "$!\n";
@@ -93,6 +89,7 @@ sub methyl_match() {
 		    if (exists($methyl_locus_line{$loci})){
 			$me_avg = ($methyl_locus_line{$loci}/100)*$signal;
 			$inv_me_avg = $signal-$me_avg;
+#			print "C\t$loci\t$methyl_locus_line{$loci}\n";
 			unless ($methyl_locus_line{$loci} eq '0'){
 			    print OUT_M "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$me_avg\n";
 			}
@@ -108,6 +105,7 @@ sub methyl_match() {
 		    if (exists($methyl_locus_line{$loci})){
 			$me_avg = ($methyl_locus_line{$loci}/100)*$signal;
 			$inv_me_avg = $signal-$me_avg;
+#			print "G\t$loci\t$methyl_locus_line{$loci}\n";
 			unless ($methyl_locus_line{$loci} eq '0'){
 			    print OUT_W "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$me_avg\n";
 			}
@@ -126,9 +124,139 @@ sub methyl_match() {
 	}
 	close SIG_FILE;	
 	close methyl_file;
+	close OUT;
     }
-}
+    #=cut
+    ### Calculate methylation for background files
+    my @background = glob ("./results/$input/final/BASELINE/*_kmer.signal");
+    
+    foreach my $m (0..$#background){
+	print ".";
+	open (BACK_FILE, $background[$m]) || die "$!\n";
+	open (BACK_OUT, ">>$background[$m].me") || die "$!\n";
+	
+	%background_avgs;
+	$kount = $all_signal = 0;
+	
+	while(<BACK_FILE>){
+	    chomp($_);
+	    
+	    my @line = split( /\s/, $_);
+	    my $chr = $line[0];
+	    my $kmer_start = $line[1];
+	    my $kmer_end = $line[2];
+	    my $kmer_seq = $line[3];
+	    my $strand = $line[4];
+	    my $signal = $line[5];
+	    my $loci = "";
+	    my $me_avg = $inv_me_avg = 0;
+	    my $length = length($kmer_seq);
+	    my @seq_split = split('',$kmer_seq);
+	    
+	    foreach $l (0..$length-1){
+		my $nuc = $seq_split[$l];
+		if ($strand eq '+'){
+		    $loci = $kmer_start+$l+1;
+		    $loci = $chr.':'.$loci;
+		}
+		
+		elsif ($strand eq '-'){
+		    $loci = $kmer_end-$l;
+		    $loci = $chr.':'.$loci;
+		}
+		
+		unless ($signal eq "NA" || $signal eq '-256.000000'){
+		    $kount++;
+		    $all_signal += $signal;
+		    
+		    if ($nuc eq 'C'){
+			if (exists($methyl_locus_line{$loci})){
+			    $me_avg = ($methyl_locus_line{$loci}/100)*$signal;
+			    $inv_me_avg = $signal-$me_avg;
+			    unless ($methyl_locus_line{$loci} eq '0'){
+				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$me_avg\n";
+			    }
+			    unless($methyl_locus_line{$loci} eq '100'){
+				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$inv_me_avg\n";
+			    }
+			}
+			else {
+			    if ($l == $length-1){
+				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$signal\n";
+			    }
+			}
+		    }
+		    elsif($nuc eq 'G'){
+			if (exists($methyl_locus_line{$loci})){
+			    $me_avg = ($methyl_locus_line{$loci}/100)*$signal;
+			    $inv_me_avg = $signal-$me_avg;
+			    unless ($methyl_locus_line{$loci} eq '0'){
+				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$me_avg\n";
+			    }
+			    unless($methyl_locus_line{$loci} eq '100'){
+				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$inv_me_avg\n";
+			    }   
+			}
+			else {
+			    if ($l == $length-1){
+				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$signal\n";
+			    }
+			}
+		    }
+		    else {
+			if ($l == $length-1){
+			    print BACK_OUT "$_\n";
+			}
+		    }
+		}
+	    }
+	}	    
+	$background[$m] =~ /.+BASELINE\/(.+)/;
+	my $file = $1;
+	chomp($file);
+	
+	$background_avgs{$file} = $all_signal/$kount;
+#	print "$file\t$background_avgs{$file}\n";
+	
+	close BACK_FILE;
+	close BACK_OUT;
+    }
+    
+    
+###Make baseline.me
+    my @back_files = glob ("./results/$input/final/BASELINE/*signal.me");                         
+    open (BASELINE, ">","./results/$input/final/BASELINE/baseline.maximums.me") || die "$!\n";
+    
+    foreach my $m (0..$#back_files){                                                                                              
+	open (BACK_FILE_ME, $back_files[$m]) || die "$!\n";   
+	my $kount = 0;
+	my $square = 0;
+	my $sum = 0;
+	my $stddev = 0;
+	my $stderr = 0;
+	my $avg = 0;
+	
+	$back_files[$m] =~ /.+BASELINE\/(.+).me/;
+	my $file = $1;
+	$avg = $background_avgs{$file};
+	
+	while(<BACK_FILE_ME>){
+	    @line = split('\t',$_);
+	    chomp($line[5]);
+	    $kount++;
+	    $square = ($line[5]-$avg)**2;
+	    $sum += $square;
+	}
+	$stddev = sqrt((1/($kount-1))*$sum);
+	$stderr = ($stddev/sqrt($kount));
+	
+	print BASELINE "$file\t$avg\t$kount\t$stddev\t$stderr\n";
+	close BACK_FILE_ME;
+    }
+    close BASELINE;
+}    
 
+#### Clean up extra variables
 
 sub generateSEM() {
     my $enum;
@@ -150,7 +278,6 @@ sub generateSEM() {
     my $me_signal;
     my $all_signal;
     my @stderr_calc;
-#    my @stderr_me_calc;
     my $sqtotal;
     my %nt;
     my %nt_m;
@@ -160,11 +287,11 @@ sub generateSEM() {
     my $sterr;
     my %stderr_m;
    
-    open (OUT, ">>./results/$input/final/BASELINE/$input.me.sem") || die "$!\n";
-    open (TOT, ">>./results/$input/final/BASELINE/$input.me.totals") || die "$!\n";
-    open (ERR, ">>./results/$input/final/BASELINE/$input.me.sterr") || die "$!\n";
+    open (OUT, ">>./results/$input/final/$input.me.sem") || die "$!\n";
+    open (TOT, ">>./results/$input/final/$input.me.totals") || die "$!\n";
+    open (ERR, ">>./results/$input/final/$input.me.sterr") || die "$!\n";
     
-    open (BASE, "./results/$input/final/BASELINE/baseline.maximums") || die "$!\n";
+    open (BASE, "./results/$input/final/BASELINE/baseline.maximums") || die "$!\n";#change to baseline.maximums.me
     while (<BASE>){
 	my $line = $_;
         chomp ($line);
@@ -180,39 +307,38 @@ sub generateSEM() {
     }
     close (BASE);
 
-#    my @me_files = glob ("./results/$input/final/ALIGNMENT/M_pos*.signal.me"); #test subset   
     my @me_files = glob ("./results/$input/final/ALIGNMENT/*_pos*.signal.me");
     my $length = (($#me_files+1)/6);
     foreach my $f (0..$#me_files){
         open (ME_FILE, $me_files[$f]) || die "$!\n";
 	print ".";
-        if ($me_files[$f] =~ /([ACTGMW])_pos(\d+).signal.me/){
+	if ($me_files[$f] =~ /([ACTGMW])_pos(\d+).signal.me/){
 	    $nt_m = $1;
-            #$nt =$nt_m = $1;
             $pos = $2;
 	    $nt_pos_m = $nt_m.'_'.$pos;
-#	    print "$nt_pos_m\n";
-#            $nt_pos_nm = $nt_pos_m = $nt.'_'.$pos;
 	}
-	$me_signal = $total_m = $all_signal = 0;
-#	$non_me_signal = $me_signal = $total_nm = $total_m = 0;
 
-	@stderr_me_calc = (); ####
+	$me_signal = $total_m = $all_signal = 0;
+
+	@stderr_me_calc = ();
+	$total_m = $all_signal = $me_signal = 0;
+	
         while (<ME_FILE>){
             my @line = split(/\s+/, $_);
 	    chomp($line[5]);
 	    
-	    $total_m++;
-	    $me_signal = $line[5];
-	    $all_signal = $all_signal+$me_signal; ####   
-	    push @stderr_me_calc, $me_signal;
-	    
-        }
+	    unless ($line[5] < 0){
+		$total_m++;
+		$me_signal = $line[5];
+		$all_signal = $all_signal+$me_signal;
+		push @stderr_me_calc, $me_signal;
+	    }
+	}
 	
-	my $avg_me_signal;
+	my  $avg_me_signal = 0;
 	
 	unless ($total_m == 0){
-            $avg_me_signal = $all_signal/$total_m; ####
+            $avg_me_signal = $all_signal/$total_m;
 	    my $sqtotal = 0;
 	    foreach my $val (@stderr_me_calc) {
 		$sqtotal += ($avg_me_signal - $val) ** 2;
@@ -220,7 +346,7 @@ sub generateSEM() {
             my $std_m = ($sqtotal/(scalar(@stderr_me_calc) - 1)) ** 0.5;
 	    my $sterr_m = $std_m/sqrt($total_m);
 	    
-	    unless( $avg_me_signal == 0){ ##added
+	    unless( $avg_me_signal < 0){
 		$nt_m{$nt_pos_m} = sprintf("%.4f", log2($avg_me_signal / $enum));
 		$stderr_m{$nt_pos_m} = sprintf("%.4f", $sterr_m / $enum);
 	    }	    
@@ -253,6 +379,7 @@ sub generateSEM() {
     $enumerr = $enumerr / $enum;
     return($enumerr, $scramerr);
 }
+  
 
 
 sub log2 {
