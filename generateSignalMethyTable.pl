@@ -33,14 +33,14 @@ sub methyl_match() {
     my $nuc;
     my $pos;
     my $loci;
-    my $me_locus; #7/30
+    my $me_locus;
     
     my %methyl_locus_line;
 #=pod
     my $CpG = glob ("./examples/WGBS/$cell_type");    
     open (methyl_file, $CpG) || die "$!\n";
     while (<methyl_file>){
-	my @me_line = split(/\t/, $_); #7/30
+	my @me_line = split(/\t/, $_);
 	unless($me_line[0]=~/\#/){
 	    chomp $me_line[3];
 	    unless ($me_line[3] == 0){
@@ -54,10 +54,14 @@ sub methyl_match() {
     foreach my $m (0..$#sigfile){
 	open (SIG_FILE, $sigfile[$m]) || die "$!\n";
 	open (OUT, ">>$sigfile[$m].me") || die "$!\n";
-	for ($sigfile[$m] =~ /([ACTG])_pos(\d+).signal/){
+	if ($sigfile[$m] =~ /([CG])_pos(\d+).signal/){
 	    print ".";
-	    open (OUT_M, ">>./results/$input/final/ALIGNMENT/M_pos$2.signal.me") || die "$!\n";
-	    open (OUT_W, ">>./results/$input/final/ALIGNMENT/W_pos$2.signal.me") || die "$!\n";
+	    if ($1 eq 'C') {
+		open (OUT_M, ">>./results/$input/final/ALIGNMENT/M_pos$2.signal.me") || die "$!\n";
+	    } 
+	    if ($1 eq 'G') {
+		open (OUT_W, ">>./results/$input/final/ALIGNMENT/W_pos$2.signal.me") || die "$!\n";
+	    }
 	}
 	
 	while(<SIG_FILE>){
@@ -78,6 +82,8 @@ sub methyl_match() {
 	    my $loci = "";
 	    my $me_avg = 0;
 	    my $inv_me_avg = 0;
+	    my $me_prop = 0;
+	    my $inv_me_prop = 0;
 	    
 	    if ($strand eq '+'){
 		$loci = $kmer_start+$pos+1;
@@ -93,34 +99,38 @@ sub methyl_match() {
 		    if (exists($methyl_locus_line{$loci})){
 			$me_avg = ($methyl_locus_line{$loci}/100)*$signal;
 			$inv_me_avg = $signal-$me_avg;
+			$me_prop = $methyl_locus_line{$loci}/100; #9/3                                              
+			$inv_me_prop = 1 - $methyl_locus_line{$loci}/100; #9/3  
 			unless ($methyl_locus_line{$loci} eq '0'){
-			    print OUT_M "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$me_avg\n";
+			    print OUT_M "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$me_avg\t$me_prop\n"; #9/3
 			}
 			unless($methyl_locus_line{$loci} eq '100'){
-			    print OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$inv_me_avg\n";
+			    print OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$inv_me_avg\t$inv_me_prop\n"; #9/3
 			}
 		    }
 		    else {
-			print OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$signal\n";
+			print OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$signal\t1\n"; #9/3
 		    }
 		}
 		elsif($nuc eq 'G'){
 		    if (exists($methyl_locus_line{$loci})){
 			$me_avg = ($methyl_locus_line{$loci}/100)*$signal;
 			$inv_me_avg = $signal-$me_avg;
+			$me_prop = $methyl_locus_line{$loci}/100; #9/3                                              
+			$inv_me_prop = 1 - $methyl_locus_line{$loci}/100; #9/3  
 			unless ($methyl_locus_line{$loci} eq '0'){
-			    print OUT_W "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$me_avg\n";
+			    print OUT_W "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$me_avg\t$me_prop\n"; #9/3
 			}
 			unless($methyl_locus_line{$loci} eq '100'){
-			    print OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$inv_me_avg\n";
+			    print OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$inv_me_avg\t$inv_me_prop\n"; #9/3
 			}   
 		    }
 		    else {
-			print OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$signal\n";
+			print OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$signal\t1\n"; #9/3
 		    }	
 		}
 		else {
-		    print OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$signal\n";
+		    print OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$signal\t1\n"; #9/3
 
 		}
 	    }
@@ -148,7 +158,7 @@ sub methyl_match() {
 	while(<BACK_FILE>){
 	    chomp($_);
 	    
-	    my @line = split( /\t/, $_); #7/30
+	    my @line = split( /\t/, $_);
 	    my $chr = $line[0];
 	    my $kmer_start = $line[1];
 	    my $kmer_end = $line[2];
@@ -158,6 +168,8 @@ sub methyl_match() {
 	    my $loci = "";
 	    my $me_avg = 0;
 	    my $inv_me_avg = 0;
+	    my $me_prop = 0;
+	    my $inv_me_prop = 0;
 	    my $length = length($kmer_seq);
 	    my @seq_split = split('',$kmer_seq);
 	    
@@ -181,16 +193,18 @@ sub methyl_match() {
 			if (exists($methyl_locus_line{$loci})){
 			    $me_avg = ($methyl_locus_line{$loci}/100)*$signal;
 			    $inv_me_avg = $signal-$me_avg;
+			    $me_prop = $methyl_locus_line{$loci}/100; #9/2
+			    $inv_me_prop = 1 - $methyl_locus_line{$loci}/100; #9/2  
 			    unless ($methyl_locus_line{$loci} eq '0'){
-				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$me_avg\n";
+				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$me_avg\t$me_prop\n"; #9/2
 			    }
 			    unless($methyl_locus_line{$loci} eq '100'){
-				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$inv_me_avg\n";
+				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$inv_me_avg\t$inv_me_prop\n"; #9/2
 			    }
 			}
 			else {
 			    if ($l == $length-1){
-				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$signal\n";
+				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$signal\t1\n"; #9/2
 			    }
 			}
 		    }
@@ -199,21 +213,21 @@ sub methyl_match() {
 			    $me_avg = ($methyl_locus_line{$loci}/100)*$signal;
 			    $inv_me_avg = $signal-$me_avg;
 			    unless ($methyl_locus_line{$loci} eq '0'){
-				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$me_avg\n";
+				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$me_avg\t$me_prop\n"; #9/2
 			    }
 			    unless($methyl_locus_line{$loci} eq '100'){
-				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$inv_me_avg\n";
+				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$inv_me_avg\t$inv_me_prop\n"; #9/2
 			    }   
 			}
 			else {
 			    if ($l == $length-1){
-				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$signal\n";
+				print BACK_OUT "$chr\t$kmer_start\t$kmer_end\t$kmer_seq\t$strand\t$signal\t1\n"; #9/2
 			    }
 			}
 		    }
 		    else {
 			if ($l == $length-1){
-			    print BACK_OUT "$_\n";
+			    print BACK_OUT "$_\t1\n"; 
 			}
 		    }
 		}
@@ -317,7 +331,7 @@ sub generateSEM() {
 	    chomp($line[5]);
 	    
 	    unless ($line[5] < 0){
-		$total_m++;
+		$total_m = $line[6] + $total_m; #9/2 $total_m++;
 		$me_signal = $line[5];
 		$all_signal = $all_signal+$me_signal;
 		push @stderr_me_calc, $me_signal;
