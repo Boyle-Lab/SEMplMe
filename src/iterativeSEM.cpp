@@ -17,6 +17,7 @@
 #include <map>
 #include <fstream>
 #include <getopt.h>
+#include <string.h>
 using namespace std;
 
 /*
@@ -32,7 +33,7 @@ int main(int argc, char **argv){
 
 	Dataset data;
 
-	int total_iterations = 250;
+	int total_iterations = 250; //SSN
 
 	time_t timer;
 	time(&timer);
@@ -135,6 +136,9 @@ int main(int argc, char **argv){
         data.cachefile = data.base_dir + "/CACHE.db";
     }
 
+    //} //SSN
+///*//SSN
+
     vector<double> pvals;
     pvals.reserve(total_iterations + 1);
     pvals.push_back(pow(4, -5));
@@ -229,8 +233,9 @@ int main(int argc, char **argv){
             final_run = "it" + std::to_string(iteration-1);
 
             //get pvalues
-            newPwm = data.base_dir + "/" + "it" + std::to_string(iteration-1) + "/" + data.TF_name + ".pwm";
-            if(iteration == 0) {
+	    newPwm = data.base_dir + "/" + "it" + std::to_string(iteration-1) + "/" + data.TF_name + ".pwm";
+
+	    if(iteration == 0) {
                 newPwm = data.PWM_file;
             }
             read_pwm(data, newPwm);
@@ -249,11 +254,29 @@ int main(int argc, char **argv){
                 exit(1);
             }
 
+	    // generate SEMplMe SSN
+	    try{
+	      const int MAX_SIZE = 100;
+	      char sys_cmd[MAX_SIZE];
+	      string iteration_str = to_string(iteration);
+	      string cmd = "perl ./generateSignalMethylTable.pl M00179 ENCFF073DUG.wig " + data.TF_name + " " + iteration_str;
+	      const char* cmd_chr = cmd.c_str();
+	      cerr << cmd << cmd_chr << endl;
+	      strcpy(sys_cmd, cmd_chr);
+	      system(sys_cmd);
+	    }
+	    catch(...){
+	      cerr << "Problem with generateSignalMethylTable.pl!!!\n\tEXITING\n";
+	      exit(1);
+	    }
+	    
             // generate final PWM from final SEM
             try{
-                generatePWMfromSEM(data,
-                           data.output_dir + "/" + data.TF_name + ".sem",
-                           data.output_dir + "/" + data.TF_name + ".pwm");
+	      cerr << data.output_dir << data.TF_name << ".me.sem" << endl; //SSN
+	      cerr << data.output_dir << data.TF_name << ".pwm"  << endl; // SSN
+	      generatePWMfromSEM(data,
+				 data.output_dir + "/" + data.TF_name + ".me.sem", //SSN
+				 data.output_dir + "/" + data.TF_name + ".pwm");
             }
             catch(...){
                 cerr << "Problem with generatePWMfromSEM!!!\n\tEXITING\n";
@@ -364,3 +387,4 @@ string read_pwm(Dataset &data, string file){
 
     return s;
 }
+//*/ //SSN
