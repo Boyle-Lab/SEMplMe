@@ -35,7 +35,7 @@ while (<TF_LIST>){
 	    
 
 ##RUN SEMplMe
-	    $finish = system("perl ./generateSignalMethyTable.pl $TF_name $cell_type");
+	    $finish = system("perl ./generateSignalMethylTable.pl $TF_name $cell_type");
 	}
     }
 }
