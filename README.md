@@ -1,71 +1,21 @@
 # SEM_CPP
-C++ implementation of the SEM algorithm
+perl implementation of the SEMplMe algorithm
 
-# System Requirements
+# Demo
 
-## Hardware Requirements
-Generation of a SEM requires variable RAM and disk storage based on the size of the initial PWM being considered. For minimal performance, we recommend a computer with the following specs:
-
-RAM: 64+ GB  
-CPU: 8+ cores, 3.4+ GHz/core
-
-The runtime on this minimal system is approximately 38 CPU hours. Compile time is approximately 35 seconds.
-
-## Software Requirements
-
-The package development version is tested on *Linux* operating systems. The developmental version of the package has been tested on the following systems:
-
-Linux: Ubuntu 18.04  
-Packages: libcurl4-dev
-
-## Demo
-
-We include a small of generation of the SEM for HNF4A in HepG2 cells. Execution time of this demo is approximately 6791 seconds on 20 threads. The expected output is:
+We include a small demo of SEMplMe for HNF4A in HepG2 cells. The expected output is:
 ```
-Running Iterative SEM building..
-        PWM: examples/MA0114.1.pwm
-        merge_file: examples/wgEncodeOpenChromDnaseHepg2Pk.narrowPeak.gz
-        bigwig: examples/wgEncodeHaibTfbsHepg2Hnf4asc8987V0416101RawRep1.bigWig
-        TF_name: HNF4A
-         output: results/HNF4A/
-        cachefile flag: results/HNF4A/HNF4A.cache.db
-        verbose
+Integrating methylation...Done
+Creating SEM...Done
+Creating R plot.............................................................................................................Done
 ....
-```
-
-# Installation
-Clone a copy of the SEMpl repository and submodules:
-
-```
-git clone --recurse-submodules https://github.com/Boyle-Lab/SEM_CPP.git
-```
-
-Build external libraries:
-```
-cd SEM_CPP/lib/libBigWig
-make
-cd ..
-make
-mv */*.so .
-cd ..
-```
-
-Symlink to bowtie index location (use your own index location):
-```
-ln -s /data/genomes/hg19/bowtie_index/ data
-```
-
-Build SEMpl
-```
-make
 ```
  
 # Usage information
-SEMpl runs as an iterative process and requires specific input files (need more details). The following example will build the SEM for HNF4a in HepG2 cells given the example data
-```
-./iterativeSEM -PWM examples/MA0114.1.pwm -merge_file examples/wgEncodeOpenChromDnaseHepg2Pk.narrowPeak -big_wig examples/wgEncodeHaibTfbsHepg2Hnf4asc8987V0416101RawRep1.bigWig -TF_name HNF4A -genome data/hg19 -output results/HNF4A
-```
+SEMplMe functions on SEMpl output, please run SEMpl before attempting SEMplMe:
+https://github.com/Boyle-Lab/SEMpl
 
-# Testing
-Run "make test" to compile and run this input example.
-
+SEMplMe requires whole genome bisulfite sequencing (WGBS) data, which can be downloaded from ENCODE. The following example will build the SEM with methylation for HNF4a in HepG2 cells given the example data including an example SEMpl output
+```
+perl ./generateSignalMethylTable.pl --TF_name HNF4A --WGBS examples/ENCFF073DUG.wig
+```
