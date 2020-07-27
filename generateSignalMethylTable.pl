@@ -1,27 +1,58 @@
-# Useage: perl generateSignalMethyTable.pl name_of_file_in_results name_of_cell_line
+# Useage: perl generateSignalMethyTable.pl name_of_file_in_results path_to_WGBS
 
 use strict;
 use warnings;
-
+use Getopt::Long;
 use File::Glob;
-my $input = $ARGV[0];
-my $cell_type = $ARGV[1];
+
+=head1 NAME
+generateSignalMethylTable.pl - script to drive the generation of SEMs with methylation
+=head1 SYNOPSIS
+generateSignalMethylTable.pl --TF_name <TF_name> --WGBS <path_to_WGBS>
+Required Options:
+ --TF_name TF name
+ --WGBS path to WGBS data
+
+=head1 OUTPUT
+ (1) <TF_name>.me.sem -- has the numerical values of the SNP Effect Matrix with methylation
+ (2) <TF_name>_semplot.me.pdf -- graphical representation of the SNP Effect Matrix with methylation
+ Bed and signal files from intermediate steps can also be kept  (.me)
+
+=head1 AUTHORS
+B<Sierra Nishizaki> - I<ssnishi@umich.edu>
+B<Alan Boyle> - I<apboyle@umich.edu>
+=head1 LICENSE AND COPYRIGHT
+
+=cut
+
+
+
+# Input file options
+my $input;
+my $cell_type;
+
+GetOptions("TF_name=s" => \$input,
+           "WGBS=s" => \$cell_type,
+        ) or die "Fatal Error: Problem parsing command-line ".$!;
 my $OutputFolder = "./results/" . $input . "/final/";
 
+
+#Run generateSignalMethylTable.pl
 #1. Add methylation data to signal file
-print STDERR "Integrating methylation";
+print STDERR "Integrating methylation...";
 my $done_me = &methyl_match();
 print STDERR "Done\n";  
 
 #2. Create a SEM
-print STDERR "Creating SEM";
+print STDERR "Creating SEM...";
 my @SEM = &generateSEM($input);
 print STDERR "Done\n";
 
 #3. Create a R plot
-print STDERR "Creating R plot";
+print STDERR "Creating R plot...";
 system ("perl ./src/generateRplot.pl  -TF_name $input -output $OutputFolder ");
 print STDERR "Done\n";
+
 
 
 #All subs found below
@@ -36,7 +67,7 @@ sub methyl_match() {
     
     my %methyl_locus_line;
 
-    my $CpG = glob ("./examples/WGBS/$cell_type");    
+    my $CpG = glob("$cell_type");    
     open (methyl_file, $CpG) || die "$!\n";
     while (<methyl_file>){
 	my @me_line = split(/\t/, $_);
