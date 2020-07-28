@@ -1,11 +1,5 @@
 
-####OPTIONS DO NOT CURRENTLY WORK
 #Plot SEM for log2 normalized data
-
-TFname <-"M00179"
-TFname <-"M00040"
-basedir <- paste0("/data/projects/SEM_CPP_methyl/results/",TFname,"/final/") # change for other directories
-plotSEM(basedir,TFname)
 
 plotSEM <- function(basedir,TFname,error=FALSE, cexError=FALSE, colError=FALSE, reverse=FALSE, cex=1) {
   score <- read.delim (paste(basedir, "/", TFname, ".me.sem", sep=""), header = T)
@@ -29,16 +23,16 @@ baseline <- read.delim(paste(basedir, "/BASELINE/baseline.maximums", sep=""),	he
     score$T <- rev(temp$A)
     score$C <- rev(temp$G)
     score$G <- rev(temp$C)
-    score$Cm <-rev(temp$Gm)
-    score$Gm <-rev(temp$Cm)
+    score$M <-rev(temp$W)
+    score$W <-rev(temp$M)
 
     temp <- stderr
     stderr$A <- rev(temp$T)
     stderr$T <- rev(temp$A)
     stderr$C <- rev(temp$G)
     stderr$G <- rev(temp$C)
-    stderr$Cm <-rev(temp$Gm)
-    stderr$Gm <-rev(temp$Cm)
+    stderr$M <-rev(temp$W)
+    stderr$W <-rev(temp$M)
 
   }
 
@@ -58,15 +52,15 @@ baseline <- read.delim(paste(basedir, "/BASELINE/baseline.maximums", sep=""),	he
   cexT = cex
   cexG = cex
   cexC = cex
-  cexGm = cex
-  cexCm = cex
+  cexW = cex
+  cexM = cex
   if(cexError) {
     cexA = semCexScale(stderr$A)
     cexT = semCexScale(stderr$T)
     cexC = semCexScale(stderr$C)
     cexG = semCexScale(stderr$G)
-    cexCm = semCexScale(stderr$Cm)
-    cexGm = semCexScale(stderr$Gm)
+    cexM = semCexScale(stderr$M)
+    cexW = semCexScale(stderr$W)
   }
   
   #colors
@@ -74,23 +68,23 @@ baseline <- read.delim(paste(basedir, "/BASELINE/baseline.maximums", sep=""),	he
   colT = "red"
   colC = "blue"
   colG = "darkgoldenrod3"
-  colCm = "cyan"
-  colGm = "gold"
+  colM = "cyan"
+  colW = "gold"
   if(colError) {
     colA = semColScale(stderr$A, color=colA)
     colT = semColScale(stderr$T, color=colT)
     colC = semColScale(stderr$C, color=colC)
     colG = semColScale(stderr$G, color=colG)
-    colCm = semColScale(stderr$Cm, color=colCm)
-    colGm = semColScale(stderr$Gm, color=colGm)
+    colM = semColScale(stderr$M, color=colM)
+    colW = semColScale(stderr$W, color=colW)
   }
   
   text (score[,1], score$A, col = colA, labels = "A", font = 2, cex=cexA)
   text (score[,1], score$T, col = colT, labels = "T", font = 2, cex=cexT)
   text (score[,1], score$C, col = colC, labels = "C", font = 2, cex=cexC)
   text (score[,1], score$G, col = colG, labels = "G", font = 2, cex=cexG)
-  text (score[,1], score$M, col = colM, labels = "M", font = 2, cex=cexCm)  
-  text (score[,1], score$W, col = colW, labels = "W", font = 2, cex=cexGm)
+  text (score[,1], score$M, col = colM, labels = "M", font = 2, cex=cexM)  
+  text (score[,1], score$W, col = colW, labels = "W", font = 2, cex=cexW)
 
   abline (h = baseline.rnd.mean-baseline.rnd.stderr, lwd = 1, col = "lightgray", lty = 3)
   abline (h = baseline.rnd.mean+baseline.rnd.stderr, lwd = 1, col = "lightgray", lty = 3)
@@ -102,8 +96,8 @@ baseline <- read.delim(paste(basedir, "/BASELINE/baseline.maximums", sep=""),	he
     arrows(score[,1], score$T-stderr$T, score[,1], score$T+stderr$T, length = 0.05, angle = 90, code=3, col = "slategray")
     arrows(score[,1], score$C-stderr$C, score[,1], score$C+stderr$C, length = 0.05, angle = 90, code=3, col = "slategray")
     arrows(score[,1], score$G-stderr$G, score[,1], score$G+stderr$G, length = 0.05, angle = 90, code=3, col = "slategray")
-    arrows(score[,1], score$Cm-stderr$Cm, score[,1], score$Cm+stderr$Cm, length = 0.05, angle = 90, code=3, col = "slategray")
-    arrows(score[,1], score$Gm-stderr$Gm, score[,1], score$Gm+stderr$Gm, length = 0.05, angle = 90, code=3, col = "slategray")
+    arrows(score[,1], score$M-stderr$M, score[,1], score$M+stderr$M, length = 0.05, angle = 90, code=3, col = "slategray")
+    arrows(score[,1], score$W-stderr$W, score[,1], score$W+stderr$W, length = 0.05, angle = 90, code=3, col = "slategray")
   }
 }
 
