@@ -2,15 +2,15 @@
 perl implementation of the SEMplMe algorithm
 
 # Installation of SEMpl
-Clone a copy of the SEMpl repository and submodules:
+Clone a copy of the SEMplMe repository and submodules:
 
 ```
-git clone --recurse-submodules https://github.com/Boyle-Lab/SEMpl.git
+git clone --recurse-submodules https://github.com/Boyle-Lab/SEMplMe.git
 ```
 
 Build external libraries:
 ```
-cd SEMpl/lib/libBigWig
+cd SEMplMe/lib/libBigWig
 make
 cd ..
 make
@@ -20,21 +20,12 @@ cd ..
 
 Symlink to bowtie index location (use your own index location):
 ```
-ln -s /data/genomes/hg19/bowtie_index/ data
+ln -s /data/genomes/hg38/bowtie_index/ data
 ```
 
 Build SEMpl
 ```
 make
-```
-
-# Expected SEMplMe output
-
-We include a small demo of SEMplMe for HNF4A in HepG2 cells. The expected output is:
-```
-Integrating methylation...Done
-Creating SEM...Done
-Creating R plot.............................................................................................................Done
 ```
  
 # Usage information
@@ -59,4 +50,15 @@ wget "https://www.encodeproject.org/files/ENCFF073DUG/@@download/ENCFF073DUG.big
 cd ..
 
 perl ./generateSignalMethylTable.pl --TF_name HNF4A --WGBS examples/ENCFF073DUG.wig
+```
+
+# Expected SEMplMe output
+
+We include a small demo of SEMplMe for HNF4A in HepG2 cells. The expected outpu\
+t is:
+```
+Integrating methylation...Done
+Creating SEM...Done
+Creating R plot................................................................\
+.............................................Done
 ```
