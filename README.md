@@ -28,7 +28,7 @@ Build SEMpl
 make
 ```
 
-# Demo
+# Expected SEMplMe output
 
 We include a small demo of SEMplMe for HNF4A in HepG2 cells. The expected output is:
 ```
@@ -48,6 +48,8 @@ DnaseHepg2Pk.narrowPeak -big_wig examples/wgEncodeHaibTfbsHepg2Hnf4asc8987V04161
 
 For more information on SEMpl please go to  https://github.com/Boyle-Lab/SEMpl
 
+
+# SEMplMe Demo 
 SEMplMe requires whole genome bisulfite sequencing (WGBS) data, which can be downloaded from ENCODE. The following example will build the SEM with methylation for HNF4a in HepG2 cells given the example data including a precomputed example SEMpl output
 ```
 cd examples
