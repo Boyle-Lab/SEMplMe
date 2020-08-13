@@ -3,6 +3,7 @@ Implementation of the SEMplMe algorithm to integrate SEMpl with methylation data
 
 Sierra S Nishizaki and Alan P Boyle, SEMplMe: A tool for integrating DNA methylation effects in transcription factor binding affinity predictions, BiorXiv 2020.
 
+We have made all of the SEMs generated as part of this work available [here](SEMs/).
 
 # System Requirements
 
