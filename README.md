@@ -17,7 +17,7 @@ The runtime on this minimal system is approximately 38 CPU hours. Compile time i
 
 ## Software Requirements
 
-The package development version is tested on *Linux* operating systems. The developmental version of the package has been tested on the following systems:
+The package development version is tested on *Linux* operating systems. In order to compile properly, you will need a version of GCC that includes the C++11 standard (versions newer than 5.0). The developmental version of the package has been tested on the following systems:
 
 Linux: Ubuntu 18.04  
 Packages: libcurl4-dev
