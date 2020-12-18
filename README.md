@@ -67,7 +67,7 @@ cd examples
 
 wget "https://www.dropbox.com/s/ila7tq11w6o7nke/ENCFF073DUG.wig.tar.gz"
 
-tar -xvfz ENCFF073DUG.wig.tar.gz
+tar -xvf ENCFF073DUG.wig.tar.gz
 
 cd ..
 
