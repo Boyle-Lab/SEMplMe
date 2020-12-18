@@ -1,0 +1,2 @@
+Total k-mer count: 65536
+Signal to background T-test [-log10(p-value)]: 14.55108
