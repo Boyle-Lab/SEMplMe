@@ -24,7 +24,7 @@ Packages: libcurl4-dev
 
 
 # Installation
-Clone a copy of the SEMplMe repository and submodules. This contains a copy of the SEMpl application that also has to be built:
+Clone a copy of the SEMplMe repository and submodules. This contains a copy of the SEMpl application that also has to be built. For any issues with building and running SEMpl, please see the SEMpl repository: https://github.com/Boyle-Lab/SEMpl. The build instructions for SEMpl are also below:
 
 ```
 git clone --recurse-submodules https://github.com/Boyle-Lab/SEMplMe.git
