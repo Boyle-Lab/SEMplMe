@@ -28,14 +28,24 @@ B<Alan Boyle> - I<apboyle@umich.edu>
 
 
 # Input file options
-my $input;
-my $cell_type;
+my $input = "";
+my $cell_type = "";
+
+my $usage = "generateSignalMethylTable.pl\nRequired Options:\n --TF_name TF name\n --WGBS path to WGBS data\n\n (1) <TF_name>.me.sem -- has the numerical values of the SNP Effect Matrix with methylation\n (2) <TF_name>_semplot.me.pdf -- graphical representation of the SNP Effect Matrix with methylation \n                              Bed and signal files from intermediate steps can also be kept  (.me)\n";
 
 GetOptions("TF_name=s" => \$input,
            "WGBS=s" => \$cell_type,
         ) or die "Fatal Error: Problem parsing command-line ".$!;
 my $OutputFolder = "./results/" . $input . "/final/";
 
+if($input eq "") {
+	print $usage;
+	die "TF input file is required!\n";
+}
+if($cell_type eq "") {
+	print $usage;
+	die "Path to WGBS data is required!\n";
+}
 
 #Run generateSignalMethylTable.pl
 #1. Add methylation data to signal file
