@@ -49,8 +49,6 @@ Build SEMpl
 ```
 make
 ```
- 
-# Demo and Usage information
 SEMplMe functions on SEMpl output, please run SEMpl before attempting to use SEMplMe outside of the demo. Example:
 
 ```
@@ -59,6 +57,17 @@ SEMplMe functions on SEMpl output, please run SEMpl before attempting to use SEM
 
 For more information on SEMpl please go to  https://github.com/Boyle-Lab/SEMpl
 
+# SEMplMe Usage Information
+```generateSignalMethylTable.pl --TF_name <TF_name> --WGBS <path_to_WGBS>
+
+Required Options:
+ --TF_name TF name
+ --WGBS path to WGBS data
+
+ (1) <TF_name>.me.sem -- has the numerical values of the SNP Effect Matrix with methylation
+ (2) <TF_name>_semplot.me.pdf -- graphical representation of the SNP Effect Matrix with methylation 
+                               Bed and signal files from intermediate steps can also be kept  (.me)
+```
 
 # SEMplMe Demo 
 SEMplMe requires whole genome bisulfite sequencing (WGBS) data, which can be downloaded from ENCODE. Of note, SEMplMe uses WGBS data in .wig format. Preconverted .bigwig to .wig files are available for download from dropbox. The following example will build the SEM with methylation for HNF4a in HepG2 cells given the example data including a precomputed example SEMpl output
